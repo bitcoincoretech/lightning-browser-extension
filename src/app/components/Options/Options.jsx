@@ -175,9 +175,6 @@ const Options = () => {
           </TabPane>
 
           <TabPane tab="Accounts" key="2">
-            {Object.entries(accounts).map((entry) => (
-              <div>{entry[1].name}</div>
-            ))}
             <ListData
               title="Existing Accounts"
               onResetCallback={resetAccounts}
