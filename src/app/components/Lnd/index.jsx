@@ -22,10 +22,19 @@ const tailLayout = {
 const LndForm = ({ ref, saveLndAccount, addLndAccountFailure }) => {
   const [form] = Form.useForm();
 
+  const onTest = () => {
+    console.log("##### onTest");
+  };
+
+  const onCancel = () => {
+    console.log("##### onCancel");
+  };
+
   return (
     <Form
       {...layout}
       form={form}
+      layout="vertical"
       name="basic"
       onFinishFailed={addLndAccountFailure}
       onFinish={(values) => saveLndAccount(values, form)}
@@ -57,6 +66,7 @@ const LndForm = ({ ref, saveLndAccount, addLndAccountFailure }) => {
             message: "Please input the macroon key!",
           },
         ]}
+        tooltip="The hex value of the admin.macaroon file"
       >
         <Input />
       </FormItem>
@@ -64,6 +74,7 @@ const LndForm = ({ ref, saveLndAccount, addLndAccountFailure }) => {
       <FormItem
         label="URL"
         name="url"
+        tooltip="The URL for the REST API"
         rules={[
           {
             type: "url",
@@ -74,10 +85,15 @@ const LndForm = ({ ref, saveLndAccount, addLndAccountFailure }) => {
       >
         <Input />
       </FormItem>
-
       <FormItem {...tailLayout}>
         <Button type="primary" htmlType="submit">
-          Submit
+          Save
+        </Button>
+        <Button htmlType="button" onClick={onTest}>
+          Test
+        </Button>
+        <Button htmlType="button" onClick={onCancel}>
+          Cancel
         </Button>
       </FormItem>
     </Form>
