@@ -4,13 +4,13 @@ import passwordSvc from "../../../common/services/password.svc";
 let chachedPassword = "";
 
 function handlePassword() {
-  messagingSvc.onMessage("set-password-to-cache", (msg) => {
+  messagingSvc.onMessage("set-password-to-cache", async (msg) => {
     chachedPassword = msg.password;
-    passwordSvc.checkPassword(chachedPassword);
+    await passwordSvc.checkPassword(chachedPassword);
   });
 
-  messagingSvc.onMessage("get-password-from-cache", () => {
-    messagingSvc.sendMessage("cached-password", {
+  messagingSvc.onMessage("get-password-from-cache", async () => {
+    await messagingSvc.sendMessage("cached-password", {
       password: chachedPassword,
     });
   });

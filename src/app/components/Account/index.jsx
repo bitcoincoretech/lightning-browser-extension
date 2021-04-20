@@ -5,6 +5,7 @@ import { Form, Row, Col, Menu, Dropdown, Button, message } from "antd";
 
 import accountSvc from "../../../common/services/account.svc";
 import connectors from "../../../extension/background-script/connectors";
+import messagingSvc from "../../../common/services/messaging.svc";
 import LndForm from "../Lnd";
 import LndHubForm from "../LndHub";
 import LnBitsForm from "../LnBits";
@@ -66,12 +67,13 @@ const Account = () => {
   const handleTestAccount = async () => {
     try {
       const values = connectorForm && (await connectorForm.validateFields());
-      const lndConnector = new connectors.lnd({
-        macaroon: values.macaroon,
-        url: values.url,
-      });
-      const info = await lndConnector.getInfo();
-      message.success(`Alias: ${info.data.alias || ""}`);
+      // const lndConnector = new connectors.lnd({
+      //   macaroon: values.macaroon,
+      //   url: values.url,
+      // });
+      // const info = await lndConnector.getInfo();
+      // message.success(`Alias: ${info.data.alias || ""}`);
+      messagingSvc.sendMessage("temp", { a: 1 });
     } catch (err) {
       message.error(`Cannot connect ${err.message || ""}`);
     }
