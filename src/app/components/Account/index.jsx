@@ -12,8 +12,8 @@ import NativeConnectionForm from "../NativeConnection";
 
 const CONNECTORS = {
   lnd: "LND",
-  lndHub: "LndHub",
-  lnBits: "LnBits",
+  lndhub: "LndHub",
+  lnbits: "LnBits",
   native: "Native",
 };
 
@@ -23,6 +23,7 @@ const Account = () => {
   const accountId = location.state && location.state.accountId;
   const [account, setAccount] = useState({});
   const [accountType, setAccountType] = useState("lnd");
+  const [disableTest, setDisableTest] = useState(false);
 
   useEffect(() => {
     async function fetchAccount() {
@@ -65,16 +66,27 @@ const Account = () => {
 
   const handleTestAccount = async () => {
     try {
+      setDisableTest(true);
       const values = connectorForm && (await connectorForm.validateFields());
-      const lndConnector = new connectors.lnd({
-        macaroon: values.macaroon,
-        url: values.url,
-      });
-      const info = await lndConnector.getInfo();
-      message.success(`Alias: ${info.data.alias || ""}`);
+      const connectorType = account && account.type;
+      if (!connectorType || !CONNECTORS[connectorType]) {
+        message.error(`Unknown connector: '${connectorType}'!`);
+        return;
+      }
+      message.info(`Trying to connect to ${values.name}`);
+
+      const testConnector = connectors[connectorType];
+      const con = new testConnector(values);
+      const info = await con.getInfo();
+
+      message.success(`Connected. Node alias: ${info.data.alias || ""}`);
     } catch (err) {
+      console.error(err);
       message.error(`Cannot connect ${err.message || ""}`);
     }
+    setTimeout(() => {
+      setDisableTest(false);
+    }, 2000);
   };
 
   const menu = (
@@ -91,10 +103,10 @@ const Account = () => {
     if (accountType === "lnd") {
       return <LndForm initialValues={account} submitHook={submitHook} />;
     }
-    if (accountType === "lndHub") {
+    if (accountType === "lndhub") {
       return <LndHubForm initialValues={account} submitHook={submitHook} />;
     }
-    if (accountType === "lnBits") {
+    if (accountType === "lnbits") {
       return <LnBitsForm initialValues={account} submitHook={submitHook} />;
     }
     if (accountType === "native") {
@@ -137,7 +149,11 @@ const Account = () => {
           )}
         </Col>
         <Col span={5}>
-          <Button type="danger" onClick={handleTestAccount}>
+          <Button
+            type="danger"
+            onClick={handleTestAccount}
+            disabled={disableTest}
+          >
             Test
           </Button>
         </Col>
