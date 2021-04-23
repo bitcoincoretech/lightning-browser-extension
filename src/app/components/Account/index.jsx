@@ -6,12 +6,14 @@ import { Form, Row, Col, Menu, Dropdown, Button, message } from "antd";
 import accountSvc from "../../../common/services/account.svc";
 import connectors from "../../../extension/background-script/connectors";
 import LndForm from "../Lnd";
+import CLightningForm from "../CLightning";
 import LndHubForm from "../LndHub";
 import LnBitsForm from "../LnBits";
 import NativeConnectionForm from "../NativeConnection";
 
 const CONNECTORS = {
   lnd: "LND",
+  clightning: "C-Lightning",
   lndhub: "LndHub",
   lnbits: "LnBits",
   native: "Native",
@@ -102,6 +104,9 @@ const Account = () => {
   const accountConfig = () => {
     if (accountType === "lnd") {
       return <LndForm initialValues={account} submitHook={submitHook} />;
+    }
+    if (accountType === "clightning") {
+      return <CLightningForm initialValues={account} submitHook={submitHook} />;
     }
     if (accountType === "lndhub") {
       return <LndHubForm initialValues={account} submitHook={submitHook} />;
