@@ -10,6 +10,7 @@ import CLightningForm from "../CLightning";
 import LndHubForm from "../LndHub";
 import LnBitsForm from "../LnBits";
 import NativeConnectionForm from "../NativeConnection";
+import NodeInfo from "../NodeInfo";
 
 const CONNECTORS = {
   lnd: "LND",
@@ -25,7 +26,9 @@ const Account = () => {
   const accountId = location.state && location.state.accountId;
   const [account, setAccount] = useState({});
   const [accountType, setAccountType] = useState("lnd");
+  const [nodeInfo, setNodeInfo] = useState(null);
   const [disableTest, setDisableTest] = useState(false);
+  const [showNodeInfo, setShowNodeInfo] = useState(false);
 
   useEffect(() => {
     async function fetchAccount() {
@@ -69,6 +72,7 @@ const Account = () => {
   const handleTestAccount = async () => {
     try {
       setDisableTest(true);
+      setNodeInfo(null);
       const values = connectorForm && (await connectorForm.validateFields());
       const connectorType = account && account.type;
       if (!connectorType || !CONNECTORS[connectorType]) {
@@ -81,6 +85,7 @@ const Account = () => {
       const con = new testConnector(values);
       const info = await con.getInfo();
 
+      setNodeInfo(info);
       message.success(`Connected. Node alias: ${info.data.alias || ""}`);
     } catch (err) {
       console.error(err);
@@ -88,7 +93,7 @@ const Account = () => {
     }
     setTimeout(() => {
       setDisableTest(false);
-    }, 2000);
+    }, 200);
   };
 
   const menu = (
@@ -124,50 +129,89 @@ const Account = () => {
 
   return (
     <>
-      <Row>
-        <Col span={1}></Col>
-        <Col span={20}>
-          <Form name="basic" layout="vertical">
-            <Form.Item label="Type" name="type">
-              <Dropdown.Button overlay={menu} disabled={account && account.id}>
-                {CONNECTORS[accountType]}
-              </Dropdown.Button>
-            </Form.Item>
-          </Form>
-        </Col>
-      </Row>
-      <Row>
-        <Col span={1}></Col>
-        <Col span={20}> {accountConfig()} </Col>
-      </Row>
-      <Row>
-        <Col span={1}></Col>
-        <Col span={5}>
-          {account && account.id ? (
-            <Button type="primary" onClick={handleSubmit}>
-              Update
-            </Button>
-          ) : (
-            <Button type="primary" onClick={handleSubmit}>
-              Add
-            </Button>
-          )}
-        </Col>
-        <Col span={5}>
-          <Button
-            type="danger"
-            onClick={handleTestAccount}
-            disabled={disableTest}
-          >
-            Test
-          </Button>
-        </Col>
-        <Col span={5}>
-          <Button type="text" onClick={history.goBack}>
-            Cancel
-          </Button>
-        </Col>
-      </Row>
+      {!showNodeInfo ? (
+        <div>
+          <Row>
+            <Col span={1}></Col>
+            <Col span={20}>
+              <Form name="basic" layout="vertical">
+                <Form.Item label="Type" name="type">
+                  <Dropdown.Button
+                    overlay={menu}
+                    disabled={account && account.id}
+                  >
+                    {CONNECTORS[accountType]}
+                  </Dropdown.Button>
+                </Form.Item>
+              </Form>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={1}></Col>
+            <Col span={23}> {accountConfig()} </Col>
+          </Row>
+          <Row>
+            <Col span={1}></Col>
+            <Col span={5}>
+              {account && account.id ? (
+                <Button type="primary" onClick={handleSubmit}>
+                  Update
+                </Button>
+              ) : (
+                <Button type="primary" onClick={handleSubmit}>
+                  Add
+                </Button>
+              )}
+            </Col>
+            <Col span={5}>
+              <Button
+                type="danger"
+                onClick={handleTestAccount}
+                loading={disableTest}
+                size="middle"
+              >
+                Test
+              </Button>
+            </Col>
+            <Col span={5}>
+              {nodeInfo ? (
+                <Button onClick={() => setShowNodeInfo(true)}>
+                  Node Details
+                </Button>
+              ) : (
+                <div></div>
+              )}
+            </Col>
+            <Col span={5}>
+              <Button type="text" onClick={history.goBack}>
+                Cancel
+              </Button>
+            </Col>
+          </Row>
+        </div>
+      ) : (
+        <div>
+          <Row>
+            <Col span={1}>&nbsp;</Col>
+          </Row>
+          <Row>
+            <Col span={1}></Col>
+            <Col span={23}>
+              <Button onClick={() => setShowNodeInfo(false)}>Back</Button>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={1}>&nbsp;</Col>
+          </Row>
+          <Row>
+            <Col span={1}></Col>
+            <Col span={22}>
+              <NodeInfo initialValues={nodeInfo} />
+            </Col>
+            <Col span={1}></Col>
+          </Row>
+        </div>
+      )}
     </>
   );
 };
